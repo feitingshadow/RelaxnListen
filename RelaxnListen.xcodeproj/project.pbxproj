@@ -22,6 +22,9 @@
 		DD543A54186D594A00C4780B /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DD543A33186D594A00C4780B /* UIKit.framework */; };
 		DD543A5C186D594A00C4780B /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = DD543A5A186D594A00C4780B /* InfoPlist.strings */; };
 		DD543A5E186D594A00C4780B /* RelaxnListenTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DD543A5D186D594A00C4780B /* RelaxnListenTests.m */; };
+		DD543A68186EDE5B00C4780B /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DD543A67186EDE5B00C4780B /* MediaPlayer.framework */; };
+		DD543A6B186EED2700C4780B /* Storage.m in Sources */ = {isa = PBXBuildFile; fileRef = DD543A6A186EED2700C4780B /* Storage.m */; };
+		DD543A6E1871224E00C4780B /* Settings.m in Sources */ = {isa = PBXBuildFile; fileRef = DD543A6D1871224E00C4780B /* Settings.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -55,6 +58,11 @@
 		DD543A59186D594A00C4780B /* RelaxnListenTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "RelaxnListenTests-Info.plist"; sourceTree = "<group>"; };
 		DD543A5B186D594A00C4780B /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		DD543A5D186D594A00C4780B /* RelaxnListenTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RelaxnListenTests.m; sourceTree = "<group>"; };
+		DD543A67186EDE5B00C4780B /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
+		DD543A69186EED2700C4780B /* Storage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Storage.h; sourceTree = "<group>"; };
+		DD543A6A186EED2700C4780B /* Storage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Storage.m; sourceTree = "<group>"; };
+		DD543A6C1871224E00C4780B /* Settings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Settings.h; sourceTree = "<group>"; };
+		DD543A6D1871224E00C4780B /* Settings.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Settings.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -62,6 +70,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DD543A68186EDE5B00C4780B /* MediaPlayer.framework in Frameworks */,
 				DD543A32186D594A00C4780B /* CoreGraphics.framework in Frameworks */,
 				DD543A34186D594A00C4780B /* UIKit.framework in Frameworks */,
 				DD543A30186D594A00C4780B /* Foundation.framework in Frameworks */,
@@ -103,6 +112,7 @@
 		DD543A2E186D594A00C4780B /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				DD543A67186EDE5B00C4780B /* MediaPlayer.framework */,
 				DD543A2F186D594A00C4780B /* Foundation.framework */,
 				DD543A31186D594A00C4780B /* CoreGraphics.framework */,
 				DD543A33186D594A00C4780B /* UIKit.framework */,
@@ -122,6 +132,10 @@
 				DD543A48186D594A00C4780B /* ViewController.m */,
 				DD543A4A186D594A00C4780B /* Images.xcassets */,
 				DD543A36186D594A00C4780B /* Supporting Files */,
+				DD543A69186EED2700C4780B /* Storage.h */,
+				DD543A6A186EED2700C4780B /* Storage.m */,
+				DD543A6C1871224E00C4780B /* Settings.h */,
+				DD543A6D1871224E00C4780B /* Settings.m */,
 			);
 			path = RelaxnListen;
 			sourceTree = "<group>";
@@ -255,6 +269,8 @@
 			files = (
 				DD543A49186D594A00C4780B /* ViewController.m in Sources */,
 				DD543A40186D594A00C4780B /* AppDelegate.m in Sources */,
+				DD543A6E1871224E00C4780B /* Settings.m in Sources */,
+				DD543A6B186EED2700C4780B /* Storage.m in Sources */,
 				DD543A3C186D594A00C4780B /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
