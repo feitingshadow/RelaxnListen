@@ -13,7 +13,7 @@
 + (Storage*) sharedStorage;
 
 - (void) saveValue:(id)value forKey:(NSString*)key;
-
-- (id) valueForKey:(NSString*)key;
+- (id) getValueForKey:(NSString *)key defaultingTo:(id)val;
+- (id) getValueForKey:(NSString*)key;
 
 @end

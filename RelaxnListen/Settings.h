@@ -7,10 +7,25 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <MediaPlayer/MediaPlayer.h>
 
 @interface Settings : NSObject
 
 + (Settings*) sharedSettings;
 
+- (void) setLastCollection:(MPMediaItemCollection*)col;
+- (MPMediaItemCollection*) getLastCollection;
+
+- (void) setLastChunkSizeMinutes:(NSTimeInterval) minutes;
+- (NSTimeInterval) getLastChunkSizeInMinutes;
+
+- (void) setLastPlayedMediaItem:(MPMediaItem*)m;
+- (MPMediaItem*) getLastPlayedMediaItem;
+
+- (void) setLastPositionInMediaTime:(NSTimeInterval)secs;
+- (NSTimeInterval) getLastPositionInMediaTime;
+
+- (void) setNumberOfSectionsToPlay:(int)numSections;
+- (int) getNumberOfSectionsToPlay;
 
 @end

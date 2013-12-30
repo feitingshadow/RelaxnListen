@@ -19,7 +19,25 @@
 
 @property (nonatomic) BOOL musicPlayedOnce; //added in
 
+@property (nonatomic, strong) IBOutlet UILabel * currentPlayingLabel;
+@property (nonatomic, strong) IBOutlet UISegmentedControl * sectionSizeSegmentedBar;
+@property (nonatomic, strong) IBOutlet UILabel * lastPlayedLabel;
+@property (nonatomic, strong) IBOutlet UILabel * currentSectionLabel;
+@property (nonatomic, strong) IBOutlet UILabel * numberSectionsLabel;
+
+@property (nonatomic, strong) IBOutlet UISlider * slider;
+@property (nonatomic, strong) IBOutlet UIButton * playButton;
+
 - (IBAction)button1:(id)sender;
 - (IBAction)button2:(id)sender;
+
+- (IBAction) skipNextChunk:(UIButton*)sender;
+- (IBAction) skipPrevChunk:(UIButton*)sender;
+- (IBAction) playlistTapped:(UIButton*)sender;
+- (IBAction) restoreLast:(UIButton*)sender;
+- (IBAction) pauseButtonTapped:(UIButton*)sender;
+- (IBAction) sectionBarSelectionChanged:(UISegmentedControl*)sender;
+
+- (IBAction) chunkSliderChangedTo:(UISlider*)sender;
 
 @end

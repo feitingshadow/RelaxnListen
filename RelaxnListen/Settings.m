@@ -7,8 +7,10 @@
 //
 
 #import "Settings.h"
+#import "Storage.h"
 
-#define DOCUMENTS_DICTIONARY_FILENAME @"documents"
+//Settings Constants
+
 
 @interface Settings()
 {
@@ -35,10 +37,65 @@
 }
 
 - (void)dealloc {
-    // Should never be called, but just here for clarity really.
+}
+
+//Begin instance methods
+
+
+- (void) setLastCollection:(MPMediaItemCollection*)col;
+{
+    [[Storage sharedStorage] saveValue:col forKey:SETTINGS_COLLECTION];
+}
+
+- (MPMediaItemCollection*) getLastCollection;
+{
+    return [[Storage sharedStorage] getValueForKey:SETTINGS_COLLECTION];
 }
 
 
+- (void) setLastChunkSizeMinutes:(NSTimeInterval) minutes;
+{
+    [[Storage sharedStorage] setValue:@(minutes) forKey:SETTINGS_CHUNK_SIZE];
+}
+
+- (NSTimeInterval) getLastChunkSizeInMinutes;
+{
+    NSNumber * n = [[Storage sharedStorage] getValueForKey:SETTINGS_CHUNK_SIZE defaultingTo:@(5)];
+    return (NSTimeInterval)[n doubleValue];
+}
+
+- (void) setLastPlayedMediaItem:(MPMediaItem*)m;
+{
+    [[Storage sharedStorage] saveValue:m forKey:SETTINGS_LAST_MEDIA_ITEM];
+}
+
+- (MPMediaItem*) getLastPlayedMediaItem;
+{
+    return [[Storage sharedStorage] getValueForKey:SETTINGS_LAST_MEDIA_ITEM];
+}
+
+- (void) setLastPositionInMediaTime:(NSTimeInterval)secs;
+{
+    [[Storage sharedStorage] setValue:@(secs) forKey:SETTINGS_LAST_PLAYED_LOC];
+}
+
+- (NSTimeInterval) getLastPositionInMediaTime;
+{
+    NSNumber * n = [[Storage sharedStorage] getValueForKey:SETTINGS_LAST_PLAYED_LOC];
+    return (NSTimeInterval)[n doubleValue];
+}
+
+
+- (void) setNumberOfSectionsToPlay:(int)numSections;
+{
+    [[Storage sharedStorage] setValue:@(numSections) forKey:SETTINGS_NUMBER_SECTIONS_BEFORE_BED];
+}
+
+- (int) getNumberOfSectionsToPlay;
+{
+    NSNumber * n = [[Storage sharedStorage] getValueForKey:SETTINGS_NUMBER_SECTIONS_BEFORE_BED  defaultingTo:@(1)];
+    return (NSTimeInterval)[n integerValue];
+}
 
 
 @end

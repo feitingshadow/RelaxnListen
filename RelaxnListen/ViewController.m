@@ -8,7 +8,7 @@
 
 #import "ViewController.h"
 #import <MediaPlayer/MediaPlayer.h>
-#import "Storage.h"
+#import "Settings.h"
 
 @interface ViewController ()
 
@@ -16,26 +16,27 @@
 
 @implementation ViewController
 
+//Labels
 - (void)viewDidLoad
 {
     [super viewDidLoad];
     
-    
-    NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
+    [self displayTheUI];
+}
+
+- (void) setupMusicPlayer;
+{
     
     self.musicPlayer =     [MPMusicPlayerController applicationMusicPlayer];
     [self.musicPlayer setShuffleMode:MPMusicShuffleModeOff];
     [self.musicPlayer setRepeatMode:MPMusicRepeatModeNone];
     
-    //bare minimum song player code.
-  //  [self.musicPlayer setQueueWithQuery:[MPMediaQuery songsQuery]];
-    
+    NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     [notificationCenter
      addObserver: self
      selector:    @selector (handle_NowPlayingItemChanged:)
      name:        MPMusicPlayerControllerNowPlayingItemDidChangeNotification
      object:      self.musicPlayer];
-    
     
     [notificationCenter
      addObserver: self
@@ -43,30 +44,25 @@
      name:        MPMusicPlayerControllerPlaybackStateDidChangeNotification
      object:      self.musicPlayer];
     
-  
     //See if something is already playing in the background
-//    MPMusicPlayerController* iPodMusicPlayer = [MPMusicPlayerController applicationMusicPlayer];
-//    //decide between iPod Music Player and application Music Player.
-//    
-//    if ([iPodMusicPlayer nowPlayingItem]) //something is already in the bg of the app
-//    {
-//        //This will be nil if it uses Home Sharing, but the PlayBackState on the notification will tell you if osmething is playing.
-//      //  [iPodMusicPlayer stop]; //forced stop NOTE: move to another area.
-//        // Update the UI (artwork, song name, volume indicator, etc.)
-//        //        to reflect the iPod state
-//    }
+    //    MPMusicPlayerController* iPodMusicPlayer = [MPMusicPlayerController ipodMusicPlayer];
+    //    if ([iPodMusicPlayer nowPlayingItem]) //something is already in the bg of the app
+    //    {
+    //
+    //  This will be nil if it uses Home Sharing, but the PlayBackState on the notification will tell you if
+    //  something is playing.
+    //      //  [iPodMusicPlayer stop]; //forced stop
+    //    }
     
     [self.musicPlayer beginGeneratingPlaybackNotifications];
-	// Do any additional setup after loading the view, typically from a nib.
 }
 
 - (void) newPlaylist;
 {
-    MPMediaPickerController *picker = [[MPMediaPickerController alloc] initWithMediaTypes: MPMediaTypeAudioBook];                   // 1
-    [picker setDelegate: self];                                         // 2
-    [picker setAllowsPickingMultipleItems: YES];                        // 3
+    MPMediaPickerController *picker = [[MPMediaPickerController alloc] initWithMediaTypes: MPMediaTypeAudioBook];
+    picker.delegate = self;
+    picker.allowsPickingMultipleItems = NO; //NO!!! for audiobook
     picker.prompt = NSLocalizedString (@"Add songs to play", "Prompt in media item picker");
-    
     [self presentViewController:picker animated:YES completion:^{ }];
 }
 
@@ -93,22 +89,103 @@
     //since ARC is enabled, good luck!!
 }
 
-- (IBAction)button1:(id)sender;
+#pragma mark - IBAction
+
+- (IBAction) skipNextChunk:(UIButton*)sender;
 {
-//    [self.musicPlayer skipToPreviousItem];
+    //   [self.musicPlayer setCurrentPlaybackTime: [timelineSlider value]]; //from old code
 }
 
-- (IBAction)button2:(id)sender;
+- (IBAction) skipPrevChunk:(UIButton*)sender;
+{
+    
+}
+
+- (IBAction) playlistTapped:(UIButton*)sender;
 {
     [self newPlaylist];
-//    [self.musicPlayer skipToNextItem];
 }
 
+- (IBAction) restoreLast:(UIButton*)sender;
+{
+    Settings * settings = [Settings sharedSettings];
+    MPMediaItemCollection * previousCollection = [settings getLastCollection];
+    if (previousCollection)
+    {
+        MPMediaItem * previousItem = [settings getLastPlayedMediaItem];
+        
+        if (previousItem)
+        { //test for previously played position.
+            NSTimeInterval previousTime = [settings getLastPositionInMediaTime];
+            
+            if (previousItem > 0)
+            {
+                //TODO
+                return;
+            }
+        }
+    }
+}
 
-#pragma mark - copied code
-- (IBAction) setTimelinePosition: (UISlider*) sender {
-    //Example of skipping. (The position in time is writable :D )
- //   [self.musicPlayer setCurrentPlaybackTime: [timelineSlider value]];
+- (IBAction) pauseButtonTapped:(UIButton*)sender;
+{
+    if (self.userMediaItemCollection)
+    {
+        MPMusicPlaybackState playbackState = [self.musicPlayer playbackState];
+        
+        if (playbackState == MPMusicPlaybackStateStopped || playbackState == MPMusicPlaybackStatePaused)
+        {
+            [self.musicPlayer play];
+        }
+        else if (playbackState == MPMusicPlaybackStatePlaying)
+        {
+            [self.musicPlayer pause];
+        }
+    }
+    else
+    {
+        //Alert
+    }
+    
+    [self displayTheUI];
+}
+
+- (IBAction) sectionBarSelectionChanged:(UISegmentedControl*)sender;
+{
+    //Change number of sections to play before sleep
+}
+
+- (IBAction) chunkSliderChangedTo:(UISlider*)sender;
+{
+    [[Settings sharedSettings] setLastChunkSizeMinutes:sender.value];
+}
+
+//Not for static displays like last played, but higher frequency changes like the slider and play/pause
+- (void) displayTheUI;
+{
+    //Play Button
+    MPMusicPlaybackState playbackState = [self.musicPlayer playbackState];
+    
+    if (playbackState == MPMusicPlaybackStatePlaying)
+    {
+        [self.playButton setTitle:@"Pause" forState:UIControlStateNormal];
+        [self.musicPlayer play];
+        [[UIApplication sharedApplication] setIdleTimerDisabled:YES];
+    }
+    else
+    {
+        [self.playButton setTitle:@"Play" forState:UIControlStateNormal];
+        [self.musicPlayer pause];
+        [[UIApplication sharedApplication] setIdleTimerDisabled:NO];
+    }
+
+    //update the chunks
+    
+    Settings * settings = [Settings sharedSettings];
+    self.slider.value = [settings getLastChunkSizeInMinutes];
+
+    self.sectionSizeSegmentedBar.selectedSegmentIndex = [settings getNumberOfSectionsToPlay];
+    
 }
 
 #pragma mark - UITableView datasource
@@ -159,24 +236,6 @@
     [self dismissViewControllerAnimated:YES completion:^{
 
     }];
-}
-
-//AddMusic sample
-// A toggle control for playing or pausing iPod library music playback, invoked
-//      when the user taps the 'playBarButton' in the Navigation bar.
-
-- (IBAction) playOrPauseMusic: (id)sender {
-    MPMusicPlaybackState playbackState = [self.musicPlayer playbackState];
-    
-    if (playbackState == MPMusicPlaybackStateStopped || playbackState == MPMusicPlaybackStatePaused)
-    {
-        [self.musicPlayer play];
-    }
-    else if (playbackState == MPMusicPlaybackStatePlaying)
-    {
-        [self.musicPlayer pause];
-    }
-    
 }
 
 // Invoked by the delegate of the media item picker when the user is finished picking music.
