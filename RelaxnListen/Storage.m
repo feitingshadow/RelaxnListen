@@ -60,18 +60,18 @@ static NSMutableDictionary * libraryDict;
 {
     if (self = [super init])
     {
-        [self hydrateDictionary:documentDict fromPath:[self documentsFullPath]];
-        [self hydrateDictionary:libraryDict fromPath:[self libraryFullpath]];
+        [self hydrateDictionary:&documentDict fromPath:[self documentsFullPath]];
+        [self hydrateDictionary:&libraryDict fromPath:[self libraryFullpath]];
     }
     [self save];
     return self;
 }
 
-- (void) hydrateDictionary:(NSMutableDictionary*)mutableDictionary fromPath:(NSString*)path;
+- (void) hydrateDictionary:(NSMutableDictionary* __strong *)mutableDictionary fromPath:(NSString*)path;
 {
-    mutableDictionary = (NSMutableDictionary*)[NSKeyedUnarchiver unarchiveObjectWithFile:path];
-    if (!mutableDictionary) {
-        mutableDictionary = [NSMutableDictionary dictionary];
+    *mutableDictionary = (NSMutableDictionary*)[NSKeyedUnarchiver unarchiveObjectWithFile:path];
+    if (! *mutableDictionary) {
+        *mutableDictionary = [NSMutableDictionary dictionary];
     }
 }
 

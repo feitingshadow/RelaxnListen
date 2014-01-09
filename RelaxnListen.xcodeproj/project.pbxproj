@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		DD4C8F2A187E8D4B0041F81A /* PlayedViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DD4C8F28187E8D4B0041F81A /* PlayedViewController.m */; };
+		DD4C8F2B187E8D4B0041F81A /* PlayedViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = DD4C8F29187E8D4B0041F81A /* PlayedViewController.xib */; };
+		DD4C8F2E187E8D800041F81A /* PlayedItemCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DD4C8F2D187E8D800041F81A /* PlayedItemCell.m */; };
+		DD4C8F31187E960A0041F81A /* PlayedItem.m in Sources */ = {isa = PBXBuildFile; fileRef = DD4C8F30187E960A0041F81A /* PlayedItem.m */; };
+		DD4C8F34187E96920041F81A /* MediaItemPropertyHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = DD4C8F33187E96920041F81A /* MediaItemPropertyHelper.m */; };
 		DD543A30186D594A00C4780B /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DD543A2F186D594A00C4780B /* Foundation.framework */; };
 		DD543A32186D594A00C4780B /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DD543A31186D594A00C4780B /* CoreGraphics.framework */; };
 		DD543A34186D594A00C4780B /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DD543A33186D594A00C4780B /* UIKit.framework */; };
@@ -14,7 +19,6 @@
 		DD543A3C186D594A00C4780B /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = DD543A3B186D594A00C4780B /* main.m */; };
 		DD543A40186D594A00C4780B /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DD543A3F186D594A00C4780B /* AppDelegate.m */; };
 		DD543A43186D594A00C4780B /* Main_iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = DD543A41186D594A00C4780B /* Main_iPhone.storyboard */; };
-		DD543A46186D594A00C4780B /* Main_iPad.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = DD543A44186D594A00C4780B /* Main_iPad.storyboard */; };
 		DD543A49186D594A00C4780B /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DD543A48186D594A00C4780B /* ViewController.m */; };
 		DD543A4B186D594A00C4780B /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DD543A4A186D594A00C4780B /* Images.xcassets */; };
 		DD543A52186D594A00C4780B /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DD543A51186D594A00C4780B /* XCTest.framework */; };
@@ -38,6 +42,15 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		DD4C8F27187E8D4B0041F81A /* PlayedViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlayedViewController.h; sourceTree = "<group>"; };
+		DD4C8F28187E8D4B0041F81A /* PlayedViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PlayedViewController.m; sourceTree = "<group>"; };
+		DD4C8F29187E8D4B0041F81A /* PlayedViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PlayedViewController.xib; sourceTree = "<group>"; };
+		DD4C8F2C187E8D800041F81A /* PlayedItemCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlayedItemCell.h; sourceTree = "<group>"; };
+		DD4C8F2D187E8D800041F81A /* PlayedItemCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PlayedItemCell.m; sourceTree = "<group>"; };
+		DD4C8F2F187E960A0041F81A /* PlayedItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlayedItem.h; sourceTree = "<group>"; };
+		DD4C8F30187E960A0041F81A /* PlayedItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PlayedItem.m; sourceTree = "<group>"; };
+		DD4C8F32187E96920041F81A /* MediaItemPropertyHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MediaItemPropertyHelper.h; sourceTree = "<group>"; };
+		DD4C8F33187E96920041F81A /* MediaItemPropertyHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MediaItemPropertyHelper.m; sourceTree = "<group>"; };
 		DD543A2C186D594A00C4780B /* RelaxnListen.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RelaxnListen.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DD543A2F186D594A00C4780B /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		DD543A31186D594A00C4780B /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -49,7 +62,6 @@
 		DD543A3E186D594A00C4780B /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		DD543A3F186D594A00C4780B /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		DD543A42186D594A00C4780B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main_iPhone.storyboard; sourceTree = "<group>"; };
-		DD543A45186D594A00C4780B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main_iPad.storyboard; sourceTree = "<group>"; };
 		DD543A47186D594A00C4780B /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
 		DD543A48186D594A00C4780B /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
 		DD543A4A186D594A00C4780B /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
@@ -128,7 +140,6 @@
 				DD543A3E186D594A00C4780B /* AppDelegate.h */,
 				DD543A3F186D594A00C4780B /* AppDelegate.m */,
 				DD543A41186D594A00C4780B /* Main_iPhone.storyboard */,
-				DD543A44186D594A00C4780B /* Main_iPad.storyboard */,
 				DD543A47186D594A00C4780B /* ViewController.h */,
 				DD543A48186D594A00C4780B /* ViewController.m */,
 				DD543A4A186D594A00C4780B /* Images.xcassets */,
@@ -138,6 +149,15 @@
 				DD543A6C1871224E00C4780B /* Settings.h */,
 				DD543A6D1871224E00C4780B /* Settings.m */,
 				DD543A6F1871244200C4780B /* Constants.h */,
+				DD4C8F27187E8D4B0041F81A /* PlayedViewController.h */,
+				DD4C8F28187E8D4B0041F81A /* PlayedViewController.m */,
+				DD4C8F29187E8D4B0041F81A /* PlayedViewController.xib */,
+				DD4C8F2C187E8D800041F81A /* PlayedItemCell.h */,
+				DD4C8F2D187E8D800041F81A /* PlayedItemCell.m */,
+				DD4C8F2F187E960A0041F81A /* PlayedItem.h */,
+				DD4C8F30187E960A0041F81A /* PlayedItem.m */,
+				DD4C8F32187E96920041F81A /* MediaItemPropertyHelper.h */,
+				DD4C8F33187E96920041F81A /* MediaItemPropertyHelper.m */,
 			);
 			path = RelaxnListen;
 			sourceTree = "<group>";
@@ -247,7 +267,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DD543A46186D594A00C4780B /* Main_iPad.storyboard in Resources */,
+				DD4C8F2B187E8D4B0041F81A /* PlayedViewController.xib in Resources */,
 				DD543A4B186D594A00C4780B /* Images.xcassets in Resources */,
 				DD543A43186D594A00C4780B /* Main_iPhone.storyboard in Resources */,
 				DD543A3A186D594A00C4780B /* InfoPlist.strings in Resources */,
@@ -271,9 +291,13 @@
 			files = (
 				DD543A49186D594A00C4780B /* ViewController.m in Sources */,
 				DD543A40186D594A00C4780B /* AppDelegate.m in Sources */,
+				DD4C8F2E187E8D800041F81A /* PlayedItemCell.m in Sources */,
 				DD543A6E1871224E00C4780B /* Settings.m in Sources */,
 				DD543A6B186EED2700C4780B /* Storage.m in Sources */,
+				DD4C8F34187E96920041F81A /* MediaItemPropertyHelper.m in Sources */,
+				DD4C8F31187E960A0041F81A /* PlayedItem.m in Sources */,
 				DD543A3C186D594A00C4780B /* main.m in Sources */,
+				DD4C8F2A187E8D4B0041F81A /* PlayedViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -310,14 +334,6 @@
 				DD543A42186D594A00C4780B /* Base */,
 			);
 			name = Main_iPhone.storyboard;
-			sourceTree = "<group>";
-		};
-		DD543A44186D594A00C4780B /* Main_iPad.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				DD543A45186D594A00C4780B /* Base */,
-			);
-			name = Main_iPad.storyboard;
 			sourceTree = "<group>";
 		};
 		DD543A5A186D594A00C4780B /* InfoPlist.strings */ = {
@@ -492,6 +508,7 @@
 				DD543A63186D594A00C4780B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		DD543A64186D594A00C4780B /* Build configuration list for PBXNativeTarget "RelaxnListenTests" */ = {
 			isa = XCConfigurationList;
@@ -500,6 +517,7 @@
 				DD543A66186D594A00C4780B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

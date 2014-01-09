@@ -22,6 +22,7 @@
 #define SETTINGS_LAST_MEDIA_ITEM @"lastmediaitem"
 #define SETTINGS_LAST_PLAYED_LOC @"AudiobookLocation"
 #define SETTINGS_NUMBER_SECTIONS_BEFORE_BED @"beforebed"
+#define SETTINGS_LAST_PLAYED @"lastPlayedItems"
 
 
 #endif

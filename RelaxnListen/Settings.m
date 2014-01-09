@@ -55,7 +55,7 @@
 
 - (void) setLastChunkSizeMinutes:(NSTimeInterval) minutes;
 {
-    [[Storage sharedStorage] setValue:@(minutes) forKey:SETTINGS_CHUNK_SIZE];
+    [[Storage sharedStorage] saveValue:@(minutes) forKey:SETTINGS_CHUNK_SIZE];
 }
 
 - (NSTimeInterval) getLastChunkSizeInMinutes;
@@ -76,7 +76,7 @@
 
 - (void) setLastPositionInMediaTime:(NSTimeInterval)secs;
 {
-    [[Storage sharedStorage] setValue:@(secs) forKey:SETTINGS_LAST_PLAYED_LOC];
+    [[Storage sharedStorage] saveValue:@(secs) forKey:SETTINGS_LAST_PLAYED_LOC];
 }
 
 - (NSTimeInterval) getLastPositionInMediaTime;
@@ -88,7 +88,7 @@
 
 - (void) setNumberOfSectionsToPlay:(int)numSections;
 {
-    [[Storage sharedStorage] setValue:@(numSections) forKey:SETTINGS_NUMBER_SECTIONS_BEFORE_BED];
+    [[Storage sharedStorage] saveValue:@(numSections) forKey:SETTINGS_NUMBER_SECTIONS_BEFORE_BED];
 }
 
 - (int) getNumberOfSectionsToPlay;
@@ -97,5 +97,45 @@
     return (NSTimeInterval)[n integerValue];
 }
 
+- (void) addItemToPlayed:(PlayedItem*)playedItem;
+{
+    if (playedItem)
+    {
+        NSMutableDictionary * lasts = [[Storage sharedStorage] getValueForKey:SETTINGS_LAST_PLAYED  defaultingTo:[NSMutableDictionary dictionaryWithCapacity:1]];
+        [lasts setObject:playedItem forKey:[MediaItemPropertyHelper nameForMedia:playedItem.mediaItem]];
+        [[Storage sharedStorage] saveValue:lasts forKey:SETTINGS_LAST_PLAYED];
+    }
+}
+
+- (PlayedItem*) getLastPlayedItem;
+{
+    NSArray * lastPlayedItems = [self lastPlayedItems];
+    
+    if ([lastPlayedItems count] > 0)
+    {
+        return lastPlayedItems.firstObject;
+    }
+    
+    return nil;
+}
+
+- (NSArray*) lastPlayedItems;
+{
+    NSMutableDictionary * dict = [[Storage sharedStorage] getValueForKey:SETTINGS_LAST_PLAYED  defaultingTo:[NSMutableDictionary dictionaryWithCapacity:1]];
+    
+    NSArray * array = [dict allValues];
+    
+    if ([array count] > 1)
+    {
+        array = [array sortedArrayUsingComparator:^NSComparisonResult(id obj1, id obj2)
+        {
+            PlayedItem * item = obj1;
+            PlayedItem * secondItem = obj2;
+            return [item.lastDate compare:secondItem.lastDate];
+        }];
+    }
+    
+    return array;
+}
 
 @end

@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import <MediaPlayer/MediaPlayer.h>
+#import "PlayedItem.h"
 
 @interface Settings : NSObject
 
@@ -27,5 +28,9 @@
 
 - (void) setNumberOfSectionsToPlay:(int)numSections;
 - (int) getNumberOfSectionsToPlay;
+
+- (void) addItemToPlayed:(PlayedItem*)playedItem;
+- (PlayedItem*) getLastPlayedItem;
+- (NSArray*) lastPlayedItems;
 
 @end
