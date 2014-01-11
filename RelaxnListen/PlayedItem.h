@@ -13,8 +13,10 @@
 
 + (PlayedItem*) itemWithMediaItem:(MPMediaItem*)item;
 
-@property MPMediaItem * mediaItem;
-@property NSTimeInterval lastInterval;
-@property NSDate * lastDate;
+@property (nonatomic, strong) MPMediaItem * mediaItem;
+@property (nonatomic, strong) NSNumber * persistentNumber;
+@property (nonatomic, strong) NSString * title;
+@property (nonatomic, assign) NSTimeInterval lastInterval;
+@property (nonatomic, strong) NSDate * lastDate;
 
 @end

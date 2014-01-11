@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import <MediaPlayer/MediaPlayer.h>
+#import "PlayedItem.h"
 
 @interface ViewController : UIViewController <MPMediaPickerControllerDelegate>
 {
@@ -15,28 +16,37 @@
     NSTimeInterval currentTimePosition;
 }
 
-@property (nonatomic, retain)   MPMediaItemCollection   *userMediaItemCollection;
+@property (nonatomic, retain) MPMediaItemCollection   *userMediaItemCollection;
 @property (nonatomic, strong) MPMusicPlayerController * musicPlayer;
 
-@property (nonatomic) BOOL musicPlayedOnce; //added in
+//@property (nonatomic) BOOL musicPlayedOnce; //added in
 
 @property (nonatomic, strong) IBOutlet UILabel * currentPlayingLabel;
 @property (nonatomic, strong) IBOutlet UILabel * sectionSizeLabel;
-@property (nonatomic, strong) IBOutlet UIButton * restartButton;
 
 @property (nonatomic, strong) IBOutlet UISlider * slider;
 @property (nonatomic, strong) IBOutlet UIButton * playButton;
 
-@property (nonatomic, strong) IBOutlet UIProgressView * progressView;
+@property (nonatomic, strong) IBOutlet UIProgressView * smallerProgressView;
 @property (nonatomic, strong) IBOutlet UIProgressView * totalProgressView;
 
-- (IBAction) skipNextChunk:(UIButton*)sender;
-- (IBAction) skipPrevChunk:(UIButton*)sender;
+@property (nonatomic, strong) PlayedItem * currentPlayedItem;
+
+- (IBAction) skipNextChunkTapped:(UIButton*)sender;
+- (IBAction) skipPrevChunkTapped:(UIButton*)sender;
 - (IBAction) playlistTapped:(UIButton*)sender;
-- (IBAction) restoreLast:(UIButton*)sender;
-- (IBAction) restartTapped:(UIButton*)sender;
 - (IBAction) pauseButtonTapped:(UIButton*)sender;
 
+- (IBAction) restoreLast:(UIButton*)sender;
+- (IBAction) restartTapped:(UIButton*)sender;
 - (IBAction) chunkSliderChangedTo:(UISlider*)sender;
+
+- (void) play;
+- (void) pause;
+- (void) stop;
+- (void) skipNextSeconds:(int)seconds;
+- (void) skipPreviousSeconds:(int)seconds;
+- (void) skipNextChunk;
+- (void) skipPreviousChunk;
 
 @end

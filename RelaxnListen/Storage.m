@@ -69,7 +69,8 @@ static NSMutableDictionary * libraryDict;
 
 - (void) hydrateDictionary:(NSMutableDictionary* __strong *)mutableDictionary fromPath:(NSString*)path;
 {
-    *mutableDictionary = (NSMutableDictionary*)[NSKeyedUnarchiver unarchiveObjectWithFile:path];
+    NSData * data = [NSData dataWithContentsOfFile:path];
+    *mutableDictionary = (NSMutableDictionary*)[NSKeyedUnarchiver unarchiveObjectWithData:data];
     if (! *mutableDictionary) {
         *mutableDictionary = [NSMutableDictionary dictionary];
     }
@@ -84,7 +85,12 @@ static NSMutableDictionary * libraryDict;
     if (value)
     {
         [libraryDict setObject:value forKey:key];
+        [documentDict setObject:value forKey:key];
         [self save];
+    }
+    else
+    {
+        NSLog(@"Empty val");
     }
 }
 
@@ -95,7 +101,7 @@ static NSMutableDictionary * libraryDict;
 
 - (id) getValueForKey:(NSString *)key defaultingTo:(id)val;
 {
-    id object = [libraryDict objectForKey:key];
+    id object = [documentDict objectForKey:key];
    
     if (object)
     {
@@ -105,13 +111,18 @@ static NSMutableDictionary * libraryDict;
 }
 - (void) save
 {
-    if ([NSKeyedArchiver archiveRootObject:documentDict toFile:[self documentsFullPath]])
+    NSData * data = [NSKeyedArchiver archivedDataWithRootObject:documentDict];
+    if ( ![data writeToFile:[self documentsFullPath] atomically:YES])
     {
         //TODO: Debug log an error (not NSLog)
        //couldn't save the documents dict
+        NSLog(@"Couldn't write to dictionary 1");
     }
-    if ( ![NSKeyedArchiver archiveRootObject:libraryDict toFile:[self libraryFullpath]])
+    
+    data = [NSKeyedArchiver archivedDataWithRootObject:libraryDict];
+    if ( ![data writeToFile:[self libraryFullpath] atomically:YES])
     {
+        NSLog(@"Couldn't write to lib dictionary");
        //couldn't save the dictionary
     }
 }

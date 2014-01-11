@@ -97,12 +97,12 @@
     return (NSTimeInterval)[n integerValue];
 }
 
-- (void) addItemToPlayed:(PlayedItem*)playedItem;
+- (void) setLastPlayedItem:(PlayedItem*)playedItem;
 {
     if (playedItem)
     {
         NSMutableDictionary * lasts = [[Storage sharedStorage] getValueForKey:SETTINGS_LAST_PLAYED  defaultingTo:[NSMutableDictionary dictionaryWithCapacity:1]];
-        [lasts setObject:playedItem forKey:[MediaItemPropertyHelper nameForMedia:playedItem.mediaItem]];
+        [lasts setObject:playedItem forKey:playedItem.title];
         [[Storage sharedStorage] saveValue:lasts forKey:SETTINGS_LAST_PLAYED];
     }
 }
@@ -131,7 +131,7 @@
         {
             PlayedItem * item = obj1;
             PlayedItem * secondItem = obj2;
-            return [item.lastDate compare:secondItem.lastDate];
+            return [secondItem.lastDate compare:item.lastDate];
         }];
     }
     

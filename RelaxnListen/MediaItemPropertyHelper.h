@@ -13,5 +13,7 @@
 
 + (NSString*) nameForMedia:(MPMediaItem*)mediaItem;
 + (NSTimeInterval) lengthOfMedia:(MPMediaItem*)mediaItem;
++ (NSNumber *) persistentIdForMedia:(MPMediaItem*)mediaItem;
++ (MPMediaItemArtwork*) artForMediaItem:(MPMediaItem*)mediaItem;
 
 @end

@@ -63,7 +63,7 @@
     static NSString *CellIdentifier = @"PlayedCell";
     PlayedItemCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     PlayedItem * playedItem = self.lastItems[indexPath.row];
-    cell.bookName.text = [MediaItemPropertyHelper nameForMedia:playedItem.mediaItem];
+    cell.bookName.text = playedItem.title;
     
     return cell;
 }
@@ -71,7 +71,7 @@
 - (void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     //todo, notify update
-    
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"PickedPreviousItem" object:nil userInfo:@{@"Item" : @(indexPath.row)}];
     [self.navigationController popViewControllerAnimated:YES];
 }
 

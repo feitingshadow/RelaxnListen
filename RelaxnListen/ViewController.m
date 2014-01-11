@@ -10,10 +10,13 @@
 #import <MediaPlayer/MediaPlayer.h>
 #import "Settings.h"
 
+#define SKIP_SEC 25
+
+//TODO: Get artwork for media in image on table/main
+
 @interface ViewController ()
 {
     NSTimeInterval startTimeInterval;
-    BOOL loadedNewTrack; //YES means reset the start point
 }
 @end
 
@@ -23,6 +26,10 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appWillSleep) name:@"Will_Sleep" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appWillWakeup) name:@"Will_Wakeup" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pickedPreviouslyPlayedItem:) name:@"PickedPreviousItem" object:nil];
     
     [self setupMusicPlayer];
     [self displayTheUI];
@@ -49,9 +56,6 @@
      object:      self.musicPlayer];
     
     [self.musicPlayer beginGeneratingPlaybackNotifications];
-
-
-    
 }
 
 - (void) newPlaylist;
@@ -65,6 +69,8 @@
 
 - (void) dealloc
 {
+    [[NSNotificationCenter defaultCenter] removeObserver: self name: @"Will_Sleep" object:self];
+    [[NSNotificationCenter defaultCenter] removeObserver: self name: @"Will_Wakeup" object:self];
     [[NSNotificationCenter defaultCenter] removeObserver: self name: MPMusicPlayerControllerNowPlayingItemDidChangeNotification object:self.musicPlayer];
     
     [[NSNotificationCenter defaultCenter] removeObserver: self
@@ -75,16 +81,16 @@
 }
 
 
-#pragma mark - IBAction
+#pragma mark - IBActions
 
-- (IBAction) skipNextChunk:(UIButton*)sender;
+- (IBAction) skipNextChunkTapped:(UIButton*)sender;
 {
-    //   [self.musicPlayer setCurrentPlaybackTime: [timelineSlider value]]; //from old code
+    [self skipNextChunk];
 }
 
-- (IBAction) skipPrevChunk:(UIButton*)sender;
+- (IBAction) skipPrevChunkTapped:(UIButton*)sender;
 {
-    
+    [self skipPreviousChunk];
 }
 
 - (IBAction) playlistTapped:(UIButton*)sender;
@@ -94,98 +100,124 @@
 
 - (IBAction) restoreLast:(UIButton*)sender;
 {
-    Settings * settings = [Settings sharedSettings];
-    MPMediaItemCollection * previousCollection = [settings getLastCollection];
-    if (previousCollection)
-    {
-        MPMediaItem * previousItem = [settings getLastPlayedMediaItem];
-        
-        if (previousItem)
-        { //test for previously played position.
-            NSTimeInterval previousTime = [settings getLastPositionInMediaTime];
-            
-            NSTimeInterval totalLength = [MediaItemPropertyHelper lengthOfMedia:previousItem];
-           
-            if (previousTime <= totalLength)
-            {
-                self.userMediaItemCollection = previousCollection;
-               
-//                currentChunk = [self chunkForTimeInterval:previousTime forMedia:previousItem chunkSize:self.slider.value];
-                currentTimePosition = previousTime;
-                
-                [self displayTheUI];
-            }
-        }
-    }
+    [self restorePreviousItemFromIndex:0];
 }
 
 
 - (IBAction) pauseButtonTapped:(UIButton*)sender;
 {
-    if (self.userMediaItemCollection)
+    if ([self currentMediaItem])
     {
         MPMusicPlaybackState playbackState = [self.musicPlayer playbackState];
-        
         if (playbackState == MPMusicPlaybackStateStopped || playbackState == MPMusicPlaybackStatePaused)
         {
-            if (self.musicPlayer == nil)
-            {
-                [self setupMusicPlayer];
-            }
-            
-            [[UIApplication sharedApplication] setIdleTimerDisabled:YES];
-            [self startRunTimer];
-            if (loadedNewTrack)
-            {
-                startTimeInterval = 0.0;
-                loadedNewTrack = NO;
-            }
-            
-            [self.musicPlayer play];
-
-            [[Settings sharedSettings] addItemToPlayed:[PlayedItem itemWithMediaItem:self.musicPlayer.nowPlayingItem]];
+            [self play];
         }
         else if (playbackState == MPMusicPlaybackStatePlaying)
         {
-            [self.musicPlayer pause];
-            [[UIApplication sharedApplication] setIdleTimerDisabled:NO];
-            [self stopTimer];
+            [self pause];
         }
     }
     else
     {
-        //Alert
+        //Alert or nothing?
     }
-    
     [self displayTheUI];
 }
 
+//Turn next functions into IBActions by the sec-skip buttons
+- (IBAction)skipNextSeconds;
+{
+    [self skipBy:SKIP_SEC];
+}
+
+- (IBAction) skipPrevSeconds;
+{
+    [self skipBy: SKIP_SEC];
+}
+
+#pragma mark - Media Playback Time Control Functions
+
+- (void) skipNextChunk;
+{
+    [self skipBy: SECS_PER_MIN * self.slider.value];
+}
+
+- (void) skipPreviousChunk;
+{
+    [self skipBy: -SECS_PER_MIN * self.slider.value];
+}
+
+- (void) play;
+{
+    if (self.currentPlayedItem)
+    {
+        [[UIApplication sharedApplication] setIdleTimerDisabled:YES];
+        [self.musicPlayer play];
+        [self startRunTimer];
+        [self storeLastPlayed];
+    }
+}
+
+- (void) pause;
+{
+    [self.musicPlayer pause];
+    [self storeLastPlayed];
+    [[UIApplication sharedApplication] setIdleTimerDisabled:NO];
+    [self stopTimer];
+    [self displayTheUI];
+}
+
+- (void) stop;
+{
+    [self pause];
+    [self.musicPlayer stop];
+    currentTimePosition = 0;
+    [self displayTheUI];
+}
+
+//Starts the timer from current position
 - (IBAction) restartTapped:(UIButton*)sender;
 {
-    //todo. Get current time playing and set startTime to that.
+    [self resetTimeFromCurrentPosition];
 }
 
 - (IBAction) chunkSliderChangedTo:(UISlider*)sender;
 {
     [[Settings sharedSettings] setLastChunkSizeMinutes:sender.value];
-    self.sectionSizeLabel.text = [NSString stringWithFormat:@"%i Minutes", (int)sender.value];
+    self.sectionSizeLabel.text = [NSString stringWithFormat:@"%i Min", (int)sender.value];
 }
 
 - (void) storeLastPlayed;
 {
-    if (self.userMediaItemCollection && self.userMediaItemCollection.items.count > 0)
+    MPMediaItem * item = [self currentMediaItem];
+    if (item)
     {
+        self.currentPlayedItem = [PlayedItem itemWithMediaItem:item]; //creates a new one from the playing one to avoid issues with not changing. Name, date, everything done, minus the current playback time.
+        //gate playback time on playing/pause?
+        self.currentPlayedItem.lastInterval = self.musicPlayer.currentPlaybackTime;
         [[Settings sharedSettings] setLastCollection: self.userMediaItemCollection];
-        [[Settings sharedSettings] setLastPlayedMediaItem:(MPMediaItem*) self.userMediaItemCollection.items[0] ];
+        [[Settings sharedSettings] setLastPlayedItem:self.currentPlayedItem];
+    }
+}
+
+- (void) resetTimeFromCurrentPosition;
+{
+    if ([self currentMediaItem])
+    {
+        startTimeInterval = self.musicPlayer.currentPlaybackTime;
+        [self displayTheUI];
     }
 }
 
 //Not for static displays like last played, but higher frequency changes like the slider and play/pause
 - (void) displayTheUI;
 {
-    //Play Button
     MPMusicPlaybackState playbackState = [self.musicPlayer playbackState];
+    self.currentPlayingLabel.text = self.currentPlayedItem.title;
+    //Todo: Adjust label height?
     
+    //Play Button
     if (playbackState == MPMusicPlaybackStatePlaying)
     {
         [self.playButton setTitle:@"Pause" forState:UIControlStateNormal];
@@ -196,122 +228,46 @@
     }
 
     //update the chunks
-    
     Settings * settings = [Settings sharedSettings];
     self.slider.value = [settings getLastChunkSizeInMinutes];
     
-}
-
-#pragma  mark - Media Picker Callbacks
-//Note: (docs say must be a controller object to be this delegate..., good luck implementing Singleton)
-
-- (void)mediaPicker:(MPMediaPickerController *)mediaPicker didPickMediaItems:(MPMediaItemCollection *)mediaItemCollection
-{
-    [self updatePlayerQueueWithMediaCollection:mediaItemCollection];
+    if (self.currentPlayedItem)
+    {
+        self.smallerProgressView.progress = (startTimeInterval - currentTimePosition) / self.slider.value * SECS_PER_MIN;
+        self.totalProgressView.progress = currentTimePosition/[MediaItemPropertyHelper lengthOfMedia:self.currentPlayedItem.mediaItem];
+    }
+    else
+    {
+        self.smallerProgressView.progress = 0;
+        self.totalProgressView.progress = 0;
+    }
     
-    [self dismissViewControllerAnimated:YES completion:^{
-        
-    }];
-    
-//    [self.musicPlayer play];
-}
-
-- (void)mediaPickerDidCancel:(MPMediaPickerController *)mediaPicker
-{
-    [self dismissViewControllerAnimated:YES completion:^{
-
-    }];
+    //Button enabling?
 }
 
 // Invoked by the delegate of the media item picker when the user is finished picking music.
 //      The delegate is either this class or the table view controller, depending on the
 //      state of the application.
-
 - (void) updatePlayerQueueWithMediaCollection: (MPMediaItemCollection *) mediaItemCollection {
-    // Configure the music player, but only if the user chose at least one song to play
-    if (mediaItemCollection) {
-        // If there's no playback queue yet...
-//        if (self.userMediaItemCollection == nil) {
-        if (YES) {
-            // apply the new media item collection as a playback queue for the music player
-            self.userMediaItemCollection = mediaItemCollection;
-            [self.musicPlayer setQueueWithItemCollection: self.userMediaItemCollection];
-            self.musicPlayedOnce = YES;
-
-            // Obtain the music player's state so it can then be
-            //      restored after updating the playback queue.
-        }
-        if(NO)
-        {
-            // Take note of whether or not the music player is playing. If it is
-            //      it needs to be started again at the end of this method.
-            
-            BOOL wasPlaying = NO;
-            if (self.musicPlayer.playbackState == MPMusicPlaybackStatePlaying) {
-                wasPlaying = YES;
-            }
-            
-            // Save the now-playing item and its current playback time.
-            MPMediaItem *nowPlayingItem         = self.musicPlayer.nowPlayingItem;
-            NSTimeInterval currentPlaybackTime  = self.musicPlayer.currentPlaybackTime;
-
-            // Combine the previously-existing media item collection with the new one
-            NSMutableArray *combinedMediaItems  = [[self.userMediaItemCollection items] mutableCopy];
-            NSArray *newMediaItems              = [mediaItemCollection items];
-            
-            [combinedMediaItems addObjectsFromArray: newMediaItems];
-
-            [self setUserMediaItemCollection: [MPMediaItemCollection collectionWithItems: (NSArray *) combinedMediaItems]];
-            
-            // Apply the new media item collection as a playback queue for the music player.
-            [self.musicPlayer setQueueWithItemCollection: self.userMediaItemCollection];
-
-            // Restore the now-playing item and its current playback time.
-            self.musicPlayer.nowPlayingItem          = nowPlayingItem;
-            self.musicPlayer.currentPlaybackTime     = currentPlaybackTime;
-            
-            // If the music player was playing, get it playing again.
-            
-            if (wasPlaying) {
-           //     [self.musicPlayer play];
-            }
-        }
-        
-        // Finally, because the music player now has a playback queue, ensure that 
-        //      the music play/pause button in the Navigation bar is enabled.
-      //  navigationBar.topItem.leftBarButtonItem.enabled = YES;
-        
-
+    if (mediaItemCollection)
+    {
+        // apply the new media item collection as a playback queue for the music player
+        self.userMediaItemCollection = mediaItemCollection;
+        [self.musicPlayer setQueueWithItemCollection: self.userMediaItemCollection];
+        currentTimePosition = 0; //make sure all time sets are after updatePlayerQueue
     }
-    
-    loadedNewTrack = YES;
 }
 
-// If the music player was paused, leave it paused. If it was playing, it will continue to
-//      play on its own. The music player state is "stopped" only if the previous list of songs
-//      had finished or if this is the first time the user has chosen songs after app
-//      launch--in which case, invoke play.
-
-- (void) restorePlaybackState {
-    
-    if (self.musicPlayer.playbackState == MPMusicPlaybackStateStopped && self.userMediaItemCollection) {
-        
-        if ( self.musicPlayedOnce == NO) {
-            self.musicPlayedOnce = YES;
-            [self.musicPlayer play];
-        }
+- (MPMediaItem *) currentMediaItem
+{
+    if (self.userMediaItemCollection && self.userMediaItemCollection.items.count > 0) {
+        return (MPMediaItem *) self.userMediaItemCollection.items.firstObject;
     }
-    
+    return nil;
 }
 
 // When the now-playing item changes, update the media item artwork and the now-playing label.
-
 - (void) handle_NowPlayingItemChanged: (id) notification {
-    
-//    MPMediaItem *currentItem = [self.musicPlayer nowPlayingItem];
-
-//    MPMediaItemArtwork *artwork = [currentItem valueForProperty: MPMediaItemPropertyArtwork];
-    
     if (self.musicPlayer.nowPlayingItem && self.musicPlayer.indexOfNowPlayingItem > 5) {
 //        [self.musicPlayer stop];
 //        exit(1);
@@ -325,47 +281,39 @@
     {
         
     }
-    
+    [self displayTheUI];
 }
-
-
 
 // When the playback state changes, set the play/pause button in the Navigation bar
 //      appropriately.
-
+//Unused...
 - (void) handle_PlaybackStateChanged: (id) notification {
     
     MPMusicPlaybackState playbackState = [self.musicPlayer playbackState];
     
-    if (playbackState == MPMusicPlaybackStatePaused) {
-        
-    } else if (playbackState == MPMusicPlaybackStatePlaying) {
-        
-        
-    } else if (playbackState == MPMusicPlaybackStateStopped) {
-        
-        // Even though stopped, invoking 'stop' ensures that the music player will play
-        //      its queue from the start.
-        [self.musicPlayer stop];
-    
+    if (playbackState == MPMusicPlaybackStatePaused)
+    {
+    }
+    else if (playbackState == MPMusicPlaybackStatePlaying)
+    {
+    }
+    else if (playbackState == MPMusicPlaybackStateStopped)
+    {
+        [self stop];
     }
     
     [self displayTheUI];
 }
 
+//Just pauses if > chunkTime
 - (void) tick:(NSTimer*)t
 {
     NSTimeInterval secondsPlayed = self.musicPlayer.currentPlaybackTime - startTimeInterval;
-    
     NSTimeInterval chunkInSeconds = self.slider.value * SECS_PER_MIN;
     
     if (secondsPlayed > chunkInSeconds)
     {
-        [self.musicPlayer pause];
-        [self.playButton setTitle:@"Play" forState:UIControlStateNormal];
-        [[UIApplication sharedApplication] setIdleTimerDisabled:NO];
-        [self stopTimer];
-        //todo, above to convenience function
+        [self pause];
     }
 }
 
@@ -381,20 +329,53 @@
     {
         [self stopTimer];
     }
-    
     runningTimer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(tick:) userInfo:nil repeats:YES];
 }
 
-#pragma mark - Currently stored
-- (MPMediaItem*) getCurrentMediaItem;
+- (void) skipBy:(int)seconds
 {
-    if (self.userMediaItemCollection && self.userMediaItemCollection.items && self.userMediaItemCollection.items.count > 0) {
-        return (MPMediaItem*)self.userMediaItemCollection.items[0];
+    MPMediaItem * item = [self currentMediaItem];
+    if (item)
+    {
+        NSTimeInterval totalSec = [MediaItemPropertyHelper lengthOfMedia:item];
+        NSTimeInterval currentSec = self.musicPlayer.currentPlaybackTime;
+        currentSec += seconds;
+        if (currentSec < 0)
+        {
+            currentSec = 0;
+        }
+        else if(currentSec > totalSec)
+        {
+            currentSec = totalSec - 0.1;
+        }
+        
+        self.musicPlayer.currentPlaybackTime = currentSec; //update progress bar
+        [self displayTheUI];
     }
-    return nil;
 }
 
+//Note, this is very unsafe. Make sure the item is still in the ipod device.
+- (void) restorePreviousItemFromIndex:(int)i;
+{
+    NSArray * lastItems = [[Settings sharedSettings] lastPlayedItems];
+    if (lastItems && lastItems.count - 1 >= i) //ensure it exists within the bounds
+    {
+        PlayedItem * previousItem = lastItems[0];
+        self.currentPlayedItem = previousItem;
+        if (previousItem.mediaItem)
+        {
+            [self updatePlayerQueueWithMediaCollection:[MPMediaItemCollection collectionWithItems:@[previousItem.mediaItem]]];
+        }
+        else
+        {
+            //breakpoint, should never hit unless not saving.
+        }
+        currentTimePosition = self.currentPlayedItem.lastInterval;
+        [self displayTheUI];
+    }
+}
 
+#pragma mark - Navigation callback
 - (void)viewWillAppear:(BOOL)animated
 {
     [self.navigationController setNavigationBarHidden:YES animated:animated];
@@ -407,6 +388,44 @@
     [super viewWillDisappear:animated];
 }
 
+#pragma mark - Notification
+
+- (void) pickedPreviouslyPlayedItem:(NSNotification*)notify;
+{
+    NSDictionary * info = notify.userInfo;
+    if ([[info allKeys] count] > 0 && [info valueForKey:@"Item"])
+    {
+        [self restorePreviousItemFromIndex:((NSNumber*)[info valueForKey:@"Item"]).intValue];
+    }
+}
+
+#pragma  mark - Application Sleep Callbacks
+- (void) appWillSleep;
+{
+    [self pause];
+}
+
+- (void) appWillWakeup;
+{
+    [self displayTheUI];
+}
+
+#pragma  mark - Media Picker Callbacks
+//Note: (docs say must be a controller object to be this delegate..., good luck implementing Singleton)
+- (void)mediaPicker:(MPMediaPickerController *)mediaPicker didPickMediaItems:(MPMediaItemCollection *)mediaItemCollection
+{
+    [self updatePlayerQueueWithMediaCollection:mediaItemCollection];
+    [self dismissViewControllerAnimated:YES completion:^{
+    }];
+}
+
+- (void)mediaPickerDidCancel:(MPMediaPickerController *)mediaPicker
+{
+    [self dismissViewControllerAnimated:YES completion:^{
+    }];
+}
+
+/*
 // from sample
 
 //- (void) handle_iPodLibraryChanged: (id) notification {
@@ -429,7 +448,7 @@
 
 // In setup music player
 
-/*
+
  //See if something is already playing in the background
  //    MPMusicPlayerController* iPodMusicPlayer = [MPMusicPlayerController ipodMusicPlayer];
  //    if ([iPodMusicPlayer nowPlayingItem]) //something is already in the bg of the app

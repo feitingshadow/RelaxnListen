@@ -29,4 +29,20 @@
     return 0;
 }
 
++ (NSNumber *) persistentIdForMedia:(MPMediaItem*)mediaItem;
+{
+    if (mediaItem)
+    {
+        NSNumber * persistId = (NSNumber*)[mediaItem valueForProperty:MPMediaItemPropertyPlaybackDuration];
+        return persistId;
+    }
+    
+    return nil;
+}
+
++ (MPMediaItemArtwork*) artForMediaItem:(MPMediaItem*)mediaItem;
+{
+    return [mediaItem valueForProperty: MPMediaItemPropertyArtwork];
+}
+
 @end
