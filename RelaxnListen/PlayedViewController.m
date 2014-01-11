@@ -64,7 +64,10 @@
     PlayedItemCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     PlayedItem * playedItem = self.lastItems[indexPath.row];
     cell.bookName.text = playedItem.title;
+    //Todo: See if mediaItem is stored, otherwise add length to the Played.
+    cell.lastAtLbl.text = [NSString stringWithFormat:@"%@ / %@",[self displayStringForSec:playedItem.lastInterval], [self displayStringForSec:[MediaItemPropertyHelper lengthOfMedia:playedItem.mediaItem]]];
     
+    cell.image.image = [[MediaItemPropertyHelper artForMediaItem:playedItem.mediaItem] imageWithSize:cell.image.frame.size];
     return cell;
 }
 
@@ -73,6 +76,21 @@
     //todo, notify update
     [[NSNotificationCenter defaultCenter] postNotificationName:@"PickedPreviousItem" object:nil userInfo:@{@"Item" : @(indexPath.row)}];
     [self.navigationController popViewControllerAnimated:YES];
+}
+
+- (NSString*) displayStringForSec:(NSTimeInterval)sec;
+{
+    int hr = sec/(SEC_PER_HOUR);
+    sec = sec - hr * SEC_PER_HOUR;
+    int min = sec/SECS_PER_MIN;
+    int secondsLeft = sec - min * SECS_PER_MIN;
+    
+    if (hr < 1)
+    {
+        return [NSString stringWithFormat:@"%02i:%02i", min, secondsLeft];
+    }
+    
+    return [NSString stringWithFormat:@"%02i:%02i:%02i", hr, min, secondsLeft];
 }
 
 @end

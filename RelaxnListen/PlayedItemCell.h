@@ -11,5 +11,7 @@
 @interface PlayedItemCell : UITableViewCell
 
 @property (nonatomic, weak) IBOutlet UILabel * bookName;
+@property (nonatomic, weak) IBOutlet UILabel * lastAtLbl;
+@property (nonatomic, weak) IBOutlet UIImageView * image;
 
 @end

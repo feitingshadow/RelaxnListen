@@ -13,7 +13,7 @@
 #pragma mark - Time
 
 #define SECS_PER_MIN 60
-
+#define SEC_PER_HOUR 3600
 
 #pragma mark - Settings Key Values
 

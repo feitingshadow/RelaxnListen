@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		DD4C8F2A187E8D4B0041F81A /* PlayedViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DD4C8F28187E8D4B0041F81A /* PlayedViewController.m */; };
-		DD4C8F2B187E8D4B0041F81A /* PlayedViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = DD4C8F29187E8D4B0041F81A /* PlayedViewController.xib */; };
 		DD4C8F2E187E8D800041F81A /* PlayedItemCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DD4C8F2D187E8D800041F81A /* PlayedItemCell.m */; };
 		DD4C8F31187E960A0041F81A /* PlayedItem.m in Sources */ = {isa = PBXBuildFile; fileRef = DD4C8F30187E960A0041F81A /* PlayedItem.m */; };
 		DD4C8F34187E96920041F81A /* MediaItemPropertyHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = DD4C8F33187E96920041F81A /* MediaItemPropertyHelper.m */; };
@@ -44,7 +43,6 @@
 /* Begin PBXFileReference section */
 		DD4C8F27187E8D4B0041F81A /* PlayedViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlayedViewController.h; sourceTree = "<group>"; };
 		DD4C8F28187E8D4B0041F81A /* PlayedViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PlayedViewController.m; sourceTree = "<group>"; };
-		DD4C8F29187E8D4B0041F81A /* PlayedViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PlayedViewController.xib; sourceTree = "<group>"; };
 		DD4C8F2C187E8D800041F81A /* PlayedItemCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlayedItemCell.h; sourceTree = "<group>"; };
 		DD4C8F2D187E8D800041F81A /* PlayedItemCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PlayedItemCell.m; sourceTree = "<group>"; };
 		DD4C8F2F187E960A0041F81A /* PlayedItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlayedItem.h; sourceTree = "<group>"; };
@@ -151,7 +149,6 @@
 				DD543A6F1871244200C4780B /* Constants.h */,
 				DD4C8F27187E8D4B0041F81A /* PlayedViewController.h */,
 				DD4C8F28187E8D4B0041F81A /* PlayedViewController.m */,
-				DD4C8F29187E8D4B0041F81A /* PlayedViewController.xib */,
 				DD4C8F2C187E8D800041F81A /* PlayedItemCell.h */,
 				DD4C8F2D187E8D800041F81A /* PlayedItemCell.m */,
 				DD4C8F2F187E960A0041F81A /* PlayedItem.h */,
@@ -267,7 +264,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DD4C8F2B187E8D4B0041F81A /* PlayedViewController.xib in Resources */,
 				DD543A4B186D594A00C4780B /* Images.xcassets in Resources */,
 				DD543A43186D594A00C4780B /* Main_iPhone.storyboard in Resources */,
 				DD543A3A186D594A00C4780B /* InfoPlist.strings in Resources */,
