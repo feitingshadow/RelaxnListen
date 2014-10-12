@@ -55,27 +55,54 @@
 {
     // Return the number of rows in the section.
     self.lastItems =[[Settings sharedSettings] lastPlayedItems];
-    return self.lastItems.count;
+    if (self.lastItems && self.lastItems.count > 0) {
+        return self.lastItems.count;
+    }
+    return 1; //Informative
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     static NSString *CellIdentifier = @"PlayedCell";
     PlayedItemCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
-    PlayedItem * playedItem = self.lastItems[indexPath.row];
-    cell.bookName.text = playedItem.title;
-    //Todo: See if mediaItem is stored, otherwise add length to the Played.
-    cell.lastAtLbl.text = [NSString stringWithFormat:@"%@ / %@",[self displayStringForSec:playedItem.lastInterval], [self displayStringForSec:[MediaItemPropertyHelper lengthOfMedia:playedItem.mediaItem]]];
-    
-    cell.image.image = [[MediaItemPropertyHelper artForMediaItem:playedItem.mediaItem] imageWithSize:cell.image.frame.size];
+   
+    if (self.lastItems && self.lastItems.count > 0) {
+        PlayedItem * playedItem = self.lastItems[indexPath.row];
+        cell.bookName.text = playedItem.title;
+        //Todo: See if mediaItem is stored, otherwise add length to the Played.
+        float totalItemSeconds = [MediaItemPropertyHelper lengthOfMedia:playedItem.mediaItem];
+        cell.lastAtLbl.text = [NSString stringWithFormat:@"%@ / %@",[self displayStringForSec:playedItem.lastInterval], [self displayStringForSec:totalItemSeconds]];
+        
+        cell.progressBar.hidden = NO;
+        
+        //Safety
+        if (totalItemSeconds > 0)
+        {
+            cell.progressBar.progress = playedItem.lastInterval / totalItemSeconds;
+        }
+        else //unknown!
+        {
+            cell.progressBar.progress = 0;
+        }
+        
+        cell.image.image = [[MediaItemPropertyHelper artForMediaItem:playedItem.mediaItem] imageWithSize:cell.image.frame.size];
+    }
+    else //Info
+    {
+        cell.bookName.text = @"As you read, your books will show here!";
+        cell.lastAtLbl.text = @"00:00 / 00:00";
+        cell.progressBar.hidden = YES;
+    }
     return cell;
 }
 
 - (void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    //todo, notify update
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"PickedPreviousItem" object:nil userInfo:@{@"Item" : @(indexPath.row)}];
-    [self.navigationController popViewControllerAnimated:YES];
+    if (self.lastItems && self.lastItems.count > 0)
+    {
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"PickedPreviousItem" object:nil userInfo:@{@"Item" : @(indexPath.row)}];
+        [self.navigationController popViewControllerAnimated:YES];
+    }
 }
 
 - (NSString*) displayStringForSec:(NSTimeInterval)sec;

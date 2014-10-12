@@ -23,6 +23,16 @@
 #define SETTINGS_LAST_PLAYED_LOC @"AudiobookLocation"
 #define SETTINGS_NUMBER_SECTIONS_BEFORE_BED @"beforebed"
 #define SETTINGS_LAST_PLAYED @"lastPlayedItems"
+#define SETTINGS_THEME @"app_theme"
+#define SETTINGS_GO_BLACK @"go_dark_when_inactive"
+#define SETTINGS_SHAKEPURPOSE @"shake_purpose"
 
+enum shakepurpose {
+    shakePurposeResetChunk = 0,
+    shakePurposePauseAudioTrack //match the segmented
+    //shakePurposeStopInfinitePlay //future feature
+    };
+//#define SHAKE_PURPOSE_RESET_CHUNK 1
+//#define SHAKE_PURPOSE_HALT_INFINITE_PLAY 2
 
 #endif

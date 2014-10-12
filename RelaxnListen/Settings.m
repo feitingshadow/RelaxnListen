@@ -138,4 +138,43 @@
     return array;
 }
 
+- (PlayedItem*) lastPlayedItemWithKey:(NSString*)key;
+{
+    NSMutableDictionary * dict = [[Storage sharedStorage] getValueForKey:SETTINGS_LAST_PLAYED  defaultingTo:[NSMutableDictionary dictionaryWithCapacity:1]];
+    return [dict objectForKey:key];
+}
+
+- (void) setShakePurpose:(enum shakepurpose)purpose;
+{
+    [[Storage sharedStorage] saveValue:@(purpose) forKey:SETTINGS_SHAKEPURPOSE];
+}
+
+- (enum shakepurpose) getCurrentShakePurpose;
+{
+    NSNumber * n = [[Storage sharedStorage] getValueForKey:SETTINGS_SHAKEPURPOSE  defaultingTo:@(shakePurposePauseAudioTrack)];
+    return (NSTimeInterval)[n unsignedIntegerValue];
+}
+
+- (void) setDarkTheme:(BOOL) darkTheme;
+{
+    [[Storage sharedStorage] saveValue:@(darkTheme) forKey:SETTINGS_THEME];
+}
+
+- (BOOL) getDarkTheme;
+{
+    NSNumber * n = [[Storage sharedStorage] getValueForKey:SETTINGS_THEME  defaultingTo:@(NO)];
+    return (NSTimeInterval)[n boolValue];
+}
+
+- (void) setGoesBlackWhenInactive:(BOOL)goesDarkIfInactive;
+{
+    [[Storage sharedStorage] saveValue:@(goesDarkIfInactive) forKey:SETTINGS_GO_BLACK];
+}
+
+- (BOOL) getGoesBlackWhenInactive;
+{
+    NSNumber * n = [[Storage sharedStorage] getValueForKey:SETTINGS_GO_BLACK  defaultingTo:@YES];
+    return (NSTimeInterval)[n boolValue];
+}
+
 @end

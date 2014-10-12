@@ -23,22 +23,39 @@
 @implementation ViewController
 
 //Labels
+
+- (void) viewDidAppear:(BOOL)animated
+{
+    [super viewDidAppear:animated];
+    [self becomeFirstResponder];
+    [self hideDarkCoverView:nil];
+}
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    
+    [self hideDarkCoverView:nil];
+
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appWillSleep) name:@"Will_Sleep" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appWillWakeup) name:@"Will_Wakeup" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pickedPreviouslyPlayedItem:) name:@"PickedPreviousItem" object:nil];
     
     [self setupMusicPlayer];
+    [self restorePreviousItemFromIndex:0];
     [self displayTheUI];
+    
+    self.testSwitch.hidden = YES;
+}
+
+- (BOOL) canBecomeFirstResponder
+{
+    return YES;
 }
 
 - (void) setupMusicPlayer;
 {
     
-    self.musicPlayer =    [MPMusicPlayerController applicationMusicPlayer];
+    self.musicPlayer = [MPMusicPlayerController applicationMusicPlayer];
     self.musicPlayer.shuffleMode = MPMusicShuffleModeOff;
     self.musicPlayer.repeatMode = MPMusicRepeatModeNone;
     
@@ -60,7 +77,7 @@
 
 - (void) newPlaylist;
 {
-    MPMediaPickerController *picker = [[MPMediaPickerController alloc] initWithMediaTypes: MPMediaTypeAudioBook];
+    MPMediaPickerController *picker = [[MPMediaPickerController alloc] initWithMediaTypes: MPMediaTypeAnyAudio];
     picker.delegate = self;
     picker.allowsPickingMultipleItems = NO; //NO!!! for audiobook
     picker.prompt = NSLocalizedString (@"Choose an audio", "Prompt in media item picker");
@@ -76,16 +93,44 @@
     [[NSNotificationCenter defaultCenter] removeObserver: self
                                                     name: MPMusicPlayerControllerPlaybackStateDidChangeNotification object: self.musicPlayer];
     
+    [NSObject cancelPreviousPerformRequestsWithTarget:self];
     [self.musicPlayer endGeneratingPlaybackNotifications];
     [self stopTimer];
+    self.titleCollection = nil;
 }
 
+- (void)motionEnded:(UIEventSubtype)motion withEvent:(UIEvent *)event {
+    
+    if (motion == UIEventSubtypeMotionShake)
+    {
+        enum shakepurpose purpose = [[Settings sharedSettings] getCurrentShakePurpose];
+        switch (purpose)
+        {
+            case shakePurposeResetChunk:
+            {
+                [self resetTimeFromCurrentPosition];
+            }
+                break;
+            case shakePurposePauseAudioTrack:
+            {
+                [self pause];
+            }
+                break;
+            default:
+                break;
+        }
+    }
+    
+    [self resetIdleScreenTimeout];
+}
 
 #pragma mark - IBActions
 
 - (IBAction) skipNextChunkTapped:(UIButton*)sender;
 {
     [self skipNextChunk];
+    [self setStartTimeTo:currentTimePosition];
+    [self pause];
 }
 
 - (IBAction) skipPrevChunkTapped:(UIButton*)sender;
@@ -95,7 +140,14 @@
 
 - (IBAction) playlistTapped:(UIButton*)sender;
 {
-    [self newPlaylist];
+//    if ([self hasTracks]) //No longer limiting to just books.
+//    {
+        [self newPlaylist];
+//    }
+//    else
+//    {
+//        [[[UIAlertView alloc] initWithTitle:@"No books found!" message:@"No audiobooks are in your library!" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil] show];
+//    }
 }
 
 - (IBAction) restoreLast:(UIButton*)sender;
@@ -103,6 +155,10 @@
     [self restorePreviousItemFromIndex:0];
 }
 
+- (IBAction) websiteTapped:(UIButton*)sender;
+{
+    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"http://www.theplaceforforgiving.com"]];
+}
 
 - (IBAction) pauseButtonTapped:(UIButton*)sender;
 {
@@ -133,7 +189,7 @@
 
 - (IBAction) skipPrevSeconds;
 {
-    [self skipBy: SKIP_SEC];
+    [self skipBy:-SKIP_SEC];
 }
 
 #pragma mark - Media Playback Time Control Functions
@@ -145,14 +201,48 @@
 
 - (void) skipPreviousChunk;
 {
-    [self skipBy: -SECS_PER_MIN * self.slider.value];
+    [self skipBy: -(SECS_PER_MIN * self.slider.value)];
+}
+
+- (IBAction) hideDarkCoverView:(UIButton*)sender;
+{
+    self.darkCoverView.hidden = YES;
+}
+
+- (IBAction) resetIdleScreenTimeout;
+{
+    [self hideDarkCoverView:nil];
+    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(makeScreenIdle) object:nil];
+    
+    if ([[Settings sharedSettings] getGoesBlackWhenInactive])
+    {
+        [self performSelector:@selector(makeScreenIdle) withObject:nil afterDelay:30.0];
+    }
+}
+
+- (void) makeScreenIdle;
+{
+    if (self.musicPlayer.playbackState == MPMusicPlaybackStatePlaying)
+    {
+        self.darkCoverView.hidden = NO;
+    }
 }
 
 - (void) play;
 {
-    if (self.currentPlayedItem)
+    if (self.currentMediaItem)
     {
         [[UIApplication sharedApplication] setIdleTimerDisabled:YES];
+        if ([[Settings sharedSettings] getGoesBlackWhenInactive])
+        {
+            [self resetIdleScreenTimeout];
+        }
+        
+        if (currentTimePosition == NAN)
+        {
+            
+        }
+        self.musicPlayer.currentPlaybackTime = currentTimePosition;
         [self.musicPlayer play];
         [self startRunTimer];
         [self storeLastPlayed];
@@ -161,18 +251,29 @@
 
 - (void) pause;
 {
-    [self.musicPlayer pause];
-    [self storeLastPlayed];
-    [[UIApplication sharedApplication] setIdleTimerDisabled:NO];
-    [self stopTimer];
-    [self displayTheUI];
+    if (self.currentMediaItem && self.musicPlayer.playbackState == MPMusicPlaybackStatePlaying)
+    {
+        if (self.musicPlayer.currentPlaybackTime != NAN && self.musicPlayer.currentPlaybackTime < HUGE_VALF)
+        {
+       //     currentTimePosition = self.musicPlayer.currentPlaybackTime;
+        }
+        else
+        {
+            
+        }
+        [self storeLastPlayed];
+        [self.musicPlayer pause];
+        [[UIApplication sharedApplication] setIdleTimerDisabled:NO];
+        [self stopTimer];
+        [self displayTheUI];
+    }
 }
 
 - (void) stop;
 {
+    [self setStartTimeTo:0];
     [self pause];
     [self.musicPlayer stop];
-    currentTimePosition = 0;
     [self displayTheUI];
 }
 
@@ -185,7 +286,7 @@
 - (IBAction) chunkSliderChangedTo:(UISlider*)sender;
 {
     [[Settings sharedSettings] setLastChunkSizeMinutes:sender.value];
-    self.sectionSizeLabel.text = [NSString stringWithFormat:@"%i Min", (int)sender.value];
+    [self displayTheUI];
 }
 
 - (void) storeLastPlayed;
@@ -193,10 +294,12 @@
     MPMediaItem * item = [self currentMediaItem];
     if (item)
     {
-        self.currentPlayedItem = [PlayedItem itemWithMediaItem:item]; //creates a new one from the playing one to avoid issues with not changing. Name, date, everything done, minus the current playback time.
+//        if (self.currentPlayedItem.lastInterval <= 0.5) {
+//            
+//            
+//        }
         //gate playback time on playing/pause?
-        self.currentPlayedItem.lastInterval = self.musicPlayer.currentPlaybackTime;
-        [[Settings sharedSettings] setLastCollection: self.userMediaItemCollection];
+        self.currentPlayedItem.lastDate = [NSDate date];
         [[Settings sharedSettings] setLastPlayedItem:self.currentPlayedItem];
     }
 }
@@ -213,36 +316,95 @@
 //Not for static displays like last played, but higher frequency changes like the slider and play/pause
 - (void) displayTheUI;
 {
+    Settings * settings = [Settings sharedSettings];
+
+    UIColor * chromeColor = [settings getDarkTheme] ? [UIColor whiteColor] : [UIColor blackColor];
+    
+    for (UILabel * titleLabel in self.titleCollection)
+    {
+        titleLabel.textColor = chromeColor;
+    }
+    
+    self.view.backgroundColor = [settings getDarkTheme] ? [UIColor blackColor] : [UIColor whiteColor];
+    
+    
     MPMusicPlaybackState playbackState = [self.musicPlayer playbackState];
     self.currentPlayingLabel.text = self.currentPlayedItem.title;
     //Todo: Adjust label height?
     
-    //Play Button
-    if (playbackState == MPMusicPlaybackStatePlaying)
+    NSString * overallDispString = @"Overall";
+    NSString * chunkDispString = @"Chunk";
+    
+    if ([self currentPlayedItem])
     {
-        [self.playButton setTitle:@"Pause" forState:UIControlStateNormal];
+        
+        self.imageView.image = [[MediaItemPropertyHelper artForMediaItem:[self currentMediaItem]] imageWithSize:self.imageView.frame.size];
+        
+        self.playButton.enabled = YES;
+        self.skipChunkButton.enabled = YES;
+        self.skipPrevChunkButton.enabled = YES;
+        self.skipNextSecondsBtn.enabled = YES;
+        self.skipPrevSecondsBtn.enabled = YES;
+        
+        //Play Button
+        if (playbackState == MPMusicPlaybackStatePlaying)
+        {
+            [self.playButton setImage:[UIImage imageNamed:@"pause.png"] forState:UIControlStateNormal];
+            //        [self.playButton setTitle:@"Pause" forState:UIControlStateNormal];
+        }
+        else
+        {
+            [self.playButton setImage:[UIImage imageNamed:@"play.png"] forState:UIControlStateNormal];
+            //        [self.playButton setTitle:@"Play" forState:UIControlStateNormal];
+        }
     }
     else
     {
-        [self.playButton setTitle:@"Play" forState:UIControlStateNormal];
+        self.playButton.enabled = NO;
+        self.skipChunkButton.enabled = NO;
+        self.skipPrevChunkButton.enabled = NO;
+        self.skipNextSecondsBtn.enabled = NO;
+        self.skipPrevSecondsBtn.enabled = NO;
+        self.currentPlayingLabel.text = @"Tap above to pick new.";
     }
 
     //update the chunks
-    Settings * settings = [Settings sharedSettings];
     self.slider.value = [settings getLastChunkSizeInMinutes];
+    self.sectionSizeLabel.text = [NSString stringWithFormat:@"%i Min", (int)self.slider.value];
     
     if (self.currentPlayedItem)
     {
-        self.smallerProgressView.progress = (startTimeInterval - currentTimePosition) / self.slider.value * SECS_PER_MIN;
-        self.totalProgressView.progress = currentTimePosition/[MediaItemPropertyHelper lengthOfMedia:self.currentPlayedItem.mediaItem];
+        float chunkTotalSec = self.slider.value * SECS_PER_MIN;
+        float tempStartTime = (currentTimePosition > startTimeInterval) ? (currentTimePosition - startTimeInterval): 0;
+
+        //DEBUG code, for testing
+        //        if (self.testSwitch.on) {
+//            self.smallerProgressView.progress = tempStartTime / (self.slider.value/2.0f);// * SECS_PER_MIN; DEBUG CODE< UNCOMMENT BEFORE RELEASE
+//        }
+//        else
+        
+        {
+            self.smallerProgressView.progress = tempStartTime / chunkTotalSec;
+
+        }
+        float totalTime = [MediaItemPropertyHelper lengthOfMedia:self.currentPlayedItem.mediaItem];
+        self.totalProgressView.progress = currentTimePosition/totalTime;
+        
+        tempStartTime = currentTimePosition - startTimeInterval;
+        chunkDispString = [NSString stringWithFormat:@"%@ %@/%@", chunkDispString, [self displayStringForSeconds:tempStartTime], [self displayStringForSeconds: chunkTotalSec] ];
+        
+        overallDispString = [NSString stringWithFormat:@"%@ %@/%@", overallDispString, [self displayStringForSeconds:currentTimePosition], [self displayStringForSeconds: totalTime] ];
+
+        self.overallProgress.text = overallDispString;
+        self.chunkProgress.text = chunkDispString;
     }
     else
     {
         self.smallerProgressView.progress = 0;
         self.totalProgressView.progress = 0;
+        self.overallProgress.text = overallDispString;
+        self.chunkProgress.text = chunkDispString;
     }
-    
-    //Button enabling?
 }
 
 // Invoked by the delegate of the media item picker when the user is finished picking music.
@@ -254,7 +416,7 @@
         // apply the new media item collection as a playback queue for the music player
         self.userMediaItemCollection = mediaItemCollection;
         [self.musicPlayer setQueueWithItemCollection: self.userMediaItemCollection];
-        currentTimePosition = 0; //make sure all time sets are after updatePlayerQueue
+        [self displayTheUI];
     }
 }
 
@@ -299,7 +461,7 @@
     }
     else if (playbackState == MPMusicPlaybackStateStopped)
     {
-        [self stop];
+        [self.musicPlayer stop];
     }
     
     [self displayTheUI];
@@ -309,12 +471,28 @@
 - (void) tick:(NSTimer*)t
 {
     NSTimeInterval secondsPlayed = self.musicPlayer.currentPlaybackTime - startTimeInterval;
-    NSTimeInterval chunkInSeconds = self.slider.value * SECS_PER_MIN;
+    NSTimeInterval chunkInSeconds;
+    if (self.musicPlayer.currentPlaybackTime != NAN) {
+        currentTimePosition = self.musicPlayer.currentPlaybackTime;
+        self.currentPlayedItem.lastInterval = currentTimePosition;
+    }
+//    if (self.testSwitch.on)
+//    {
+//        chunkInSeconds = self.slider.value /2.0f;
+//    }
+//    else
+    {
+        chunkInSeconds = self.slider.value * SECS_PER_MIN;
+    }
     
+    [self storeLastPlayed];
     if (secondsPlayed > chunkInSeconds)
     {
+        [self resetTimeFromCurrentPosition];
         [self pause];
     }
+    
+    [self displayTheUI];
 }
 
 - (void) stopTimer;
@@ -344,12 +522,16 @@
         {
             currentSec = 0;
         }
-        else if(currentSec > totalSec)
+        else if(currentSec > totalSec || currentSec == NAN)
         {
-            currentSec = totalSec - 0.1;
+            [self stop];
+            currentSec = 0;
         }
-        
+
+        currentTimePosition = currentSec;
+        self.currentPlayedItem.lastInterval = currentTimePosition;
         self.musicPlayer.currentPlaybackTime = currentSec; //update progress bar
+        [self storeLastPlayed];
         [self displayTheUI];
     }
 }
@@ -358,9 +540,10 @@
 - (void) restorePreviousItemFromIndex:(int)i;
 {
     NSArray * lastItems = [[Settings sharedSettings] lastPlayedItems];
-    if (lastItems && lastItems.count - 1 >= i) //ensure it exists within the bounds
+    if (lastItems && ( ( (signed)[lastItems count] - 1) >= i)) //ensure it exists within the bounds
     {
-        PlayedItem * previousItem = lastItems[0];
+        [self pause];
+        PlayedItem * previousItem = lastItems[i];
         self.currentPlayedItem = previousItem;
         if (previousItem.mediaItem)
         {
@@ -370,20 +553,42 @@
         {
             //breakpoint, should never hit unless not saving.
         }
-        currentTimePosition = self.currentPlayedItem.lastInterval;
+        if (self.currentPlayedItem.lastInterval == NAN || self.currentPlayedItem.lastInterval >= [MediaItemPropertyHelper lengthOfMedia:self.currentPlayedItem.mediaItem])
+        {
+            [self setStartTimeTo:0];
+        }
+        else
+        {
+            [self setStartTimeTo:previousItem.lastInterval];
+        }
+//        [self resetTimeFromCurrentPosition];
         [self displayTheUI];
     }
+}
+
+- (void) setStartTimeTo:(NSTimeInterval) time;
+{
+    currentTimePosition = time;
+    startTimeInterval = time;
 }
 
 #pragma mark - Navigation callback
 - (void)viewWillAppear:(BOOL)animated
 {
+    [self hideDarkCoverView:nil];
     [self.navigationController setNavigationBarHidden:YES animated:animated];
+    [self displayTheUI];
     [super viewWillAppear:animated];
+    
+    if (self.musicPlayer.playbackState == MPMusicPlaybackStatePlaying)
+    {
+        [self resetIdleScreenTimeout]; //re-hide the player if returning to screen while playing.
+    }
 }
 
 - (void)viewWillDisappear:(BOOL)animated
 {
+    [self resignFirstResponder];
     [self.navigationController setNavigationBarHidden:NO animated:animated];
     [super viewWillDisappear:animated];
 }
@@ -407,6 +612,7 @@
 
 - (void) appWillWakeup;
 {
+    [self hideDarkCoverView:nil];
     [self displayTheUI];
 }
 
@@ -415,14 +621,74 @@
 - (void)mediaPicker:(MPMediaPickerController *)mediaPicker didPickMediaItems:(MPMediaItemCollection *)mediaItemCollection
 {
     [self updatePlayerQueueWithMediaCollection:mediaItemCollection];
+    self.currentPlayedItem = [PlayedItem itemWithMediaItem:[self currentMediaItem]];
+    PlayedItem * played = [[Settings sharedSettings] lastPlayedItemWithKey:self.currentPlayedItem.title];
+    [self pause];
+    if (played) {
+        [self setStartTimeTo:played.lastInterval];
+    }
+    else
+    {
+        [self setStartTimeTo:0];
+    }
+    [self displayTheUI];
     [self dismissViewControllerAnimated:YES completion:^{
     }];
+}
+
+- (NSString*) displayStringForSeconds:(NSTimeInterval)sec;
+{
+    BOOL negative = NO;
+    if (sec < 0) {
+        negative = YES;
+        sec *= -1;
+    }
+    int hr = sec/(SEC_PER_HOUR);
+    sec = sec - hr * SEC_PER_HOUR;
+    int min = sec/SECS_PER_MIN;
+    int secondsLeft = sec - min * SECS_PER_MIN;
+    
+    if (hr < 1)
+    {
+        if (negative)
+        {
+            return [NSString stringWithFormat:@"-%02i:%02i", min, secondsLeft];
+        }
+        return [NSString stringWithFormat:@"%02i:%02i", min, secondsLeft];
+    }
+    if (negative)
+    {
+        return [NSString stringWithFormat:@"-%02i:%02i", min, secondsLeft];
+    }
+    return [NSString stringWithFormat:@"%02i:%02i:%02i", hr, min, secondsLeft];
 }
 
 - (void)mediaPickerDidCancel:(MPMediaPickerController *)mediaPicker
 {
     [self dismissViewControllerAnimated:YES completion:^{
     }];
+}
+
+- (BOOL) hasTracks;
+{
+    return YES; //No longer using just audiobooks, obsolete function.
+    NSArray * collections = [[MPMediaQuery audiobooksQuery] collections];
+
+    if ( [collections count] > 0) {
+        //Has audiobooks
+        MPMediaItemCollection * collection = collections[0];
+        if ([collection.items count] > 0) {
+            return YES;
+        }
+        else
+        {
+            return NO;
+        }
+    }
+    else
+    {
+        return NO;
+    }
 }
 
 /*

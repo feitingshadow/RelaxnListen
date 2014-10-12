@@ -27,5 +27,16 @@
 - (void) setLastPlayedItem:(PlayedItem*)m;
 - (PlayedItem*) getLastPlayedItem;
 - (NSArray*) lastPlayedItems;
+- (PlayedItem*) lastPlayedItemWithKey:(NSString*)key;
+
+// after v1.0.0 features
+- (void) setShakePurpose:(enum shakepurpose)purpose;
+- (enum shakepurpose) getCurrentShakePurpose;
+
+- (void) setDarkTheme:(BOOL) darkTheme;
+- (BOOL) getDarkTheme;
+
+- (void) setGoesBlackWhenInactive:(BOOL)disables;
+- (BOOL) getGoesBlackWhenInactive;
 
 @end
