@@ -4,14 +4,29 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
+		<key>RelaxnListen copy.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>2</integer>
+		</dict>
 		<key>RelaxnListen.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
 			<integer>0</integer>
 		</dict>
+		<key>RelaxnListenLiteEd.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>1</integer>
+		</dict>
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
+		<key>BD3E42341A5A3D2A00CD3400</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
 		<key>DD543A2B186D594A00C4780B</key>
 		<dict>
 			<key>primary</key>
