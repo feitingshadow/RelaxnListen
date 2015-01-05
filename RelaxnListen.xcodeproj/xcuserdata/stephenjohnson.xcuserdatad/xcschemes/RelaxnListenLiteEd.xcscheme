@@ -32,9 +32,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "DD543A2B186D594A00C4780B"
-            BuildableName = "Lazy-Listener.app"
-            BlueprintName = "RelaxnListen"
+            BlueprintIdentifier = "BD3E42341A5A3D2A00CD3400"
+            BuildableName = "RelaxnListen LE.app"
+            BlueprintName = "RelaxnListen Lite"
             ReferencedContainer = "container:RelaxnListen.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -51,9 +51,9 @@
       <BuildableProductRunnable>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "DD543A2B186D594A00C4780B"
-            BuildableName = "Lazy-Listener.app"
-            BlueprintName = "RelaxnListen"
+            BlueprintIdentifier = "BD3E42341A5A3D2A00CD3400"
+            BuildableName = "RelaxnListen LE.app"
+            BlueprintName = "RelaxnListen Lite"
             ReferencedContainer = "container:RelaxnListen.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
